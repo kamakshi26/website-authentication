@@ -1,10 +1,11 @@
 //jshint esversion:6
-
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const path=require("path");
 const mongoose = require("mongoose");
+const encrypt= require("mongoose-encryption");
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -16,11 +17,14 @@ app.use(express.static("public"));
 mongoose.connect("mongodb://localhost:27017/userDB",{useNewUrlParser: true});//database url connect
 
 // create user schema
-const userSchema=mongoose.Schema({
+const userSchema=new mongoose.Schema({
   email : String,
   password :String
 });
 
+//level 2 encryption
+
+userSchema.plugin(encrypt, { secret:process.env.SECRET, encryptedFields: ['password']});
 // create usermodel
 const userModel=mongoose.model("user",userSchema);
 
@@ -44,7 +48,7 @@ app.post('/register',function(req,res){
     email : req.body.username,
     password :req.body.password
   });
-  newData.save(function(err){
+  newData.save(function(err){ //encrypt password when you save
     if(err){
       console.log(err);
     }else{
@@ -58,7 +62,7 @@ app.post('/register',function(req,res){
 app.post('/login',function(req,res){
   const username=req.body.username;
   const password=req.body.password;
-  userModel.findOne({email : username}, function(err,foundvalue){
+  userModel.findOne({email : username}, function(err,foundvalue){  //decrypt password when you find
     if(err){
       console.log(err);
     }else{
