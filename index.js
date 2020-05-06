@@ -173,5 +173,5 @@ req.login(user,function(err){
 });
 
 app.listen(3000, function() {
-  console.log("iam ready princess! good to go love!");
+  console.log("good to go!");
 });
